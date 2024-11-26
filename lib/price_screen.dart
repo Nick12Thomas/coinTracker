@@ -8,7 +8,7 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  String selectedCurrency = "USD";
+  String selectedCurrency = "AUD";
 
   // List<DropdownMenuItem<String>> getDropdownItems() {
   //   List<String> uniqueCurrencies =
@@ -33,18 +33,10 @@ class _PriceScreenState extends State<PriceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Validate that selectedCurrency exists in the dropdown list
-    List<String> availableCurrencies = currenciesList.toSet().toList();
-    if (!availableCurrencies.contains(selectedCurrency)) {
-      selectedCurrency =
-          availableCurrencies.first; // Set to a default valid value
-    }
-
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blueAccent,
-        title: Text('🤑 Coin Ticker'),
+        title: Text('Coin Tracker'),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
