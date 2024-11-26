@@ -1,3 +1,5 @@
+import 'package:bitcoin_ticker/coin_data.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class PriceScreen extends StatefulWidget {
@@ -6,10 +8,42 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
+  String selectedCurrency = "USD";
+
+  // List<DropdownMenuItem<String>> getDropdownItems() {
+  //   List<String> uniqueCurrencies =
+  //       currenciesList.toSet().toList(); // remove duplicate
+  //   List<DropdownMenuItem<String>> dropdownItems = [];
+  //   for (String currency in uniqueCurrencies) {
+  //     dropdownItems.add(DropdownMenuItem<String>(
+  //       child: Text(currency),
+  //       value: currency,
+  //     ));
+  //   }
+  //   return dropdownItems;
+  // }
+
+  List<Widget> getPickerItem() {
+    List<Text> pickerItem = [];
+    for (String currency in currenciesList) {
+      pickerItem.add(Text(currency));
+    }
+    return pickerItem;
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Validate that selectedCurrency exists in the dropdown list
+    List<String> availableCurrencies = currenciesList.toSet().toList();
+    if (!availableCurrencies.contains(selectedCurrency)) {
+      selectedCurrency =
+          availableCurrencies.first; // Set to a default valid value
+    }
+
+
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blueAccent,
         title: Text('🤑 Coin Ticker'),
       ),
       body: Column(
@@ -27,7 +61,7 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = ? USD',
+                  '1 BTC = ? $selectedCurrency',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
@@ -41,8 +75,16 @@ class _PriceScreenState extends State<PriceScreen> {
             height: 150.0,
             alignment: Alignment.center,
             padding: EdgeInsets.only(bottom: 30.0),
-            color: Colors.lightBlue,
-            child: null,
+            color: Colors.blueAccent,
+            child: CupertinoPicker(
+              itemExtent: 32.0,
+              onSelectedItemChanged: (value) {
+                setState(() {
+                  selectedCurrency = currenciesList[value];
+                });
+              },
+              children: getPickerItem(),
+            ),
           ),
         ],
       ),
