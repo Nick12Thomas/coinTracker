@@ -1,6 +1,7 @@
 import 'package:bitcoin_ticker/coin_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -10,25 +11,57 @@ class PriceScreen extends StatefulWidget {
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = "AUD";
 
-  // List<DropdownMenuItem<String>> getDropdownItems() {
-  //   List<String> uniqueCurrencies =
-  //       currenciesList.toSet().toList(); // remove duplicate
-  //   List<DropdownMenuItem<String>> dropdownItems = [];
-  //   for (String currency in uniqueCurrencies) {
-  //     dropdownItems.add(DropdownMenuItem<String>(
-  //       child: Text(currency),
-  //       value: currency,
-  //     ));
-  //   }
-  //   return dropdownItems;
-  // }
+  DropdownButton<String> androidPicker() {
+    List<String> uniqueCurrencies =
+        currenciesList.toSet().toList(); // remove duplicate
+    List<DropdownMenuItem<String>> dropdownItems = [];
+    for (String currency in uniqueCurrencies) {
+      dropdownItems.add(
+        DropdownMenuItem<String>(
+          child: Text(currency),
+          value: currency,
+        ),
+      );
+    }
+    return DropdownButton<String>(
+      items: dropdownItems,
+      value: selectedCurrency,
+      onChanged: (String? value) {
+        if (value != null) {
+          setState(
+            () {
+              selectedCurrency = value;
+            },
+          );
+        }
+      },
+    );
+  }
 
-  List<Widget> getPickerItem() {
+  CupertinoPicker iosPicker() {
     List<Text> pickerItem = [];
     for (String currency in currenciesList) {
       pickerItem.add(Text(currency));
     }
-    return pickerItem;
+    return CupertinoPicker(
+      itemExtent: 32.0,
+      onSelectedItemChanged: (value) {
+        setState(() {
+          selectedCurrency = currenciesList[value];
+        });
+      },
+      children: pickerItem,
+    );
+  }
+
+  Widget getPicker() {
+    if (Platform.isIOS) {
+      return iosPicker();
+    } else if (Platform.isAndroid) {
+      return androidPicker();
+    } else {
+      return Text("Picker not available for this platform");
+    }
   }
 
   @override
@@ -68,15 +101,7 @@ class _PriceScreenState extends State<PriceScreen> {
             alignment: Alignment.center,
             padding: EdgeInsets.only(bottom: 30.0),
             color: Colors.blueAccent,
-            child: CupertinoPicker(
-              itemExtent: 32.0,
-              onSelectedItemChanged: (value) {
-                setState(() {
-                  selectedCurrency = currenciesList[value];
-                });
-              },
-              children: getPickerItem(),
-            ),
+            child: iosPicker(),
           ),
         ],
       ),
