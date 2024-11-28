@@ -1,7 +1,9 @@
+import 'package:bitcoin_ticker/Models/networking.dart';
 import 'package:bitcoin_ticker/coin_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
+
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -10,10 +12,19 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = "AUD";
+  String exchangeRate = '?';
+
+  final Networking networking=Networking();
+
+  void updateExchangeRate() async {
+    double? rate = await networking.getExchangeRate('BTC', selectedCurrency);
+    setState(() {
+      exchangeRate = rate != null ? rate.toStringAsFixed(2) : 'Error';
+    });
+  }
 
   DropdownButton<String> androidPicker() {
-    List<String> uniqueCurrencies =
-        currenciesList.toSet().toList(); // remove duplicate
+    List<String> uniqueCurrencies = currenciesList.toSet().toList(); // Remove duplicates
     List<DropdownMenuItem<String>> dropdownItems = [];
     for (String currency in uniqueCurrencies) {
       dropdownItems.add(
@@ -28,20 +39,19 @@ class _PriceScreenState extends State<PriceScreen> {
       value: selectedCurrency,
       onChanged: (String? value) {
         if (value != null) {
-          setState(
-            () {
-              selectedCurrency = value;
-            },
-          );
+          setState(() {
+            selectedCurrency = value;
+          });
+          updateExchangeRate(); // Fetch updated rate
         }
       },
     );
   }
 
   CupertinoPicker iosPicker() {
-    List<Text> pickerItem = [];
+    List<Text> pickerItems = [];
     for (String currency in currenciesList) {
-      pickerItem.add(Text(currency));
+      pickerItems.add(Text(currency));
     }
     return CupertinoPicker(
       itemExtent: 32.0,
@@ -49,8 +59,9 @@ class _PriceScreenState extends State<PriceScreen> {
         setState(() {
           selectedCurrency = currenciesList[value];
         });
+        updateExchangeRate(); // Fetch updated rate
       },
-      children: pickerItem,
+      children: pickerItems,
     );
   }
 
@@ -62,6 +73,12 @@ class _PriceScreenState extends State<PriceScreen> {
     } else {
       return Text("Picker not available for this platform");
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    updateExchangeRate(); // Fetch initial rate on app start
   }
 
   @override
@@ -86,7 +103,7 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = ? $selectedCurrency',
+                  '1 BTC = $exchangeRate $selectedCurrency',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
@@ -101,7 +118,7 @@ class _PriceScreenState extends State<PriceScreen> {
             alignment: Alignment.center,
             padding: EdgeInsets.only(bottom: 30.0),
             color: Colors.blueAccent,
-            child: iosPicker(),
+            child: getPicker(),
           ),
         ],
       ),
