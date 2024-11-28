@@ -1,9 +1,9 @@
-import 'package:bitcoin_ticker/Models/networking.dart';
-import 'package:bitcoin_ticker/coin_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:bitcoin_ticker/Models/networking.dart';
+import 'package:bitcoin_ticker/coin_data.dart';
+import 'package:bitcoin_ticker/Models/cards.dart';
 import 'dart:io' show Platform;
-
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -12,19 +12,24 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = "AUD";
-  String exchangeRate = '?';
+  String exchangeRate1 = '?';
+  String exchangeRate2 = '?';
 
-  final Networking networking=Networking();
+  final Networking networking = Networking();
 
   void updateExchangeRate() async {
-    double? rate = await networking.getExchangeRate('BTC', selectedCurrency);
+    double? rateBTC = await networking.getExchangeRate('BTC', selectedCurrency);
+    double? rateETH = await networking.getExchangeRate('ETH', selectedCurrency);
+
     setState(() {
-      exchangeRate = rate != null ? rate.toStringAsFixed(2) : 'Error';
+      exchangeRate1 = rateBTC != null ? rateBTC.toStringAsFixed(2) : 'Error';
+      exchangeRate2 = rateETH != null ? rateETH.toStringAsFixed(2) : 'Error';
     });
   }
 
   DropdownButton<String> androidPicker() {
-    List<String> uniqueCurrencies = currenciesList.toSet().toList(); // Remove duplicates
+    List<String> uniqueCurrencies =
+    currenciesList.toSet().toList(); // Remove duplicates
     List<DropdownMenuItem<String>> dropdownItems = [];
     for (String currency in uniqueCurrencies) {
       dropdownItems.add(
@@ -94,23 +99,21 @@ class _PriceScreenState extends State<PriceScreen> {
         children: <Widget>[
           Padding(
             padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  '1 BTC = $exchangeRate $selectedCurrency',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
+            child: Column(
+              children: [
+                // Display BTC and ETH rate cards
+                Cards(
+                  coin: 'BTC',
+                  rate: exchangeRate1,
+                  selectedCurrency: selectedCurrency,
                 ),
-              ),
+                SizedBox(height: 60,),
+                Cards(
+                  coin: 'ETH',
+                  rate: exchangeRate2,
+                  selectedCurrency: selectedCurrency,
+                ),
+              ],
             ),
           ),
           Container(
